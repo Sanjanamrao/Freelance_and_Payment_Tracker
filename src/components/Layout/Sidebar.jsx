@@ -1,12 +1,13 @@
-
 import React from 'react';
-import { Drawer, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Box, Avatar, Typography } from '@mui/material';
+import { Drawer, Box, List, ListItem, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import PeopleIcon from '@mui/icons-material/People';
+
+export const drawerWidth = 240; // export the width so AppLayout can use it
 
 export default function Sidebar({ activeTab, setActiveTab }) {
   const nav = [
@@ -22,44 +23,35 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     <Drawer
       variant="permanent"
       sx={{
-        '& .MuiDrawer-paper': { width: 260, borderRight: '1px solid #eee', boxShadow: 'rgba(2,6,23,0.06) 0px 6px 18px' }
+        width: drawerWidth,
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: drawerWidth,
+          boxSizing: 'border-box',
+          position: 'fixed' // ensure drawer stays fixed on left
+        }
       }}
     >
       <Toolbar />
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ fontWeight: 800, background: 'linear-gradient(90deg,#4C6FFF,#8B5CF6)', WebkitBackgroundClip: 'text', color: 'transparent' }}>
-          FreelanceHub
-        </Typography>
-        <Typography variant="body2" color="text.secondary">Freelance & Payment Tracker</Typography>
-      </Box>
-
-      <List>
-        {nav.map(item => (
-          <ListItemButton
-            key={item.id}
-            selected={activeTab === item.id}
-            onClick={() => setActiveTab(item.id)}
-            sx={{
-              mx: 2, my: 0.5, borderRadius: 1.5,
-              ...(activeTab === item.id && { background: 'linear-gradient(90deg,#4C6FFF,#7C6BFF)', color: '#fff' })
-            }}
-          >
-            <ListItemIcon sx={{ color: activeTab === item.id ? '#fff' : undefined }}>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.label} />
-          </ListItemButton>
-        ))}
-      </List>
-
-      <Box sx={{ flex: 1 }} />
-
-      <Box sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', p: 2, borderRadius: 2, backgroundColor: '#f8fafc' }}>
-          <Avatar sx={{ bgcolor: 'primary.main' }}>JD</Avatar>
-          <Box>
-            <Typography variant="subtitle2">John Doe</Typography>
-            <Typography variant="caption" color="text.secondary">Freelancer</Typography>
-          </Box>
-        </Box>
+      <Box sx={{ overflow: 'auto' }}>
+        <List>
+          {nav.map(item => (
+            <ListItem
+              key={item.id}
+              button
+              selected={activeTab === item.id}
+              onClick={() => setActiveTab(item.id)}
+              sx={{
+                borderRadius: 1.5,
+                my: 0.5,
+                ...(activeTab === item.id && { background: 'linear-gradient(90deg,#4C6FFF,#7C6BFF)', color: '#fff' })
+              }}
+            >
+              <ListItemIcon sx={{ color: activeTab === item.id ? '#fff' : undefined }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.label} sx={{ opacity: activeTab === item.id ? 1 : 0.7 }} />
+            </ListItem>
+          ))}
+        </List>
       </Box>
     </Drawer>
   );

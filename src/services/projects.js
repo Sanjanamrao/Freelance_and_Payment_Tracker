@@ -1,8 +1,54 @@
-// src/services/projects.js
-import api from './api';
+//services/projects.js
 
-export const getProjects = () => api.get('/projects');
-export const getProject = id => api.get(`/projects/${id}`);
-export const createProject = data => api.post('/projects', data);
-export const updateProject = (id, data) => api.put(`/projects/${id}`, data);
-export const deleteProject = id => api.delete(`/projects/${id}`);
+import supabase from './supabase';
+
+// Get all projects
+export async function getProjects() {
+  const { data, error } = await supabase.from('projects').select('*');
+  if (error) throw error;
+  return data || [];
+}
+
+// Get a single project by ID
+export async function getProject(id) {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('id', id) // use 'id' if your schema defines uuid PK
+    .single();
+
+  if (error) throw error;
+  return data || null;
+}
+
+// Create a new project
+export async function createProject(payload) {
+  const { data, error } = await supabase
+    .from('projects')
+    .insert([payload])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data || null;
+}
+
+// Update a project
+export async function updateProject(id, payload) {
+  const { data, error } = await supabase
+    .from('projects')
+    .update(payload)
+    .eq('id', id) // align with schema
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data || null;
+}
+
+// Delete a project
+export async function deleteProject(id) {
+  const { data, error } = await supabase.from('projects').delete().eq('id', id);
+  if (error) throw error;
+  return data || [];
+}

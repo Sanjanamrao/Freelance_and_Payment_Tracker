@@ -1,17 +1,27 @@
-// src/pages/Clients/ClientList.jsx
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Paper, Typography, Button, TextField } from '@mui/material';
 import { getClients } from '../../services/clients';
 import { useToast } from '../../context/ToastContext.jsx';
+import ClientFormDialog from '../../components/ClientFormDialog';
 
-export default function ClientList({ onShowAdd }) {
+export default function ClientList() {
   const [clients, setClients] = useState([]);
   const { notify } = useToast();
   const [q, setQ] = useState('');
+  const [openAdd, setOpenAdd] = useState(false);
 
   useEffect(() => {
-    getClients().then(res => setClients(res.data)).catch(() => notify('Failed to load clients', 'error'));
-  }, [notify]);
+    fetchClients();
+  }, []);
+
+  async function fetchClients() {
+    try {
+      const data = await getClients();
+      setClients(data);
+    } catch {
+      notify('Failed to load clients', 'error');
+    }
+  }
 
   const filtered = clients.filter(c => !q || c.name.toLowerCase().includes(q.toLowerCase()));
 
@@ -19,11 +29,16 @@ export default function ClientList({ onShowAdd }) {
     <Box>
       <Grid container alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
         <Grid item><Typography variant="h6">Clients</Typography></Grid>
-        <Grid item><Button variant="contained" onClick={onShowAdd}>Add Client</Button></Grid>
+        <Grid item><Button variant="contained" onClick={() => setOpenAdd(true)}>Add Client</Button></Grid>
       </Grid>
 
       <Paper sx={{ p: 2, mb: 2 }}>
-        <TextField size="small" placeholder="Search clients..." value={q} onChange={e => setQ(e.target.value)} />
+        <TextField
+          size="small"
+          placeholder="Search clients..."
+          value={q}
+          onChange={e => setQ(e.target.value)}
+        />
       </Paper>
 
       <Grid container spacing={3}>
@@ -57,6 +72,13 @@ export default function ClientList({ onShowAdd }) {
           </Grid>
         ))}
       </Grid>
+
+      {/* Add Client Dialog */}
+      <ClientFormDialog
+        open={openAdd}
+        onClose={() => setOpenAdd(false)}
+        onSuccess={fetchClients}
+      />
     </Box>
   );
 }

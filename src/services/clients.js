@@ -1,7 +1,22 @@
+// services/clients.js
 
-import api from './api';
-export const getClients = () => api.get('/clients');
-export const getClient = id => api.get(`/clients/${id}`);
-export const createClient = data => api.post('/clients', data);
-export const updateClient = (id, data) => api.put(`/clients/${id}`, data);
-export const deleteClient = id => api.delete(`/clients/${id}`);
+import supabase from './supabase';
+
+// Create a client and return the inserted row
+export async function createClient(payload) {
+  const { data, error } = await supabase
+    .from('clients')
+    .insert([payload]) // ensure array format
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data || null;
+}
+
+// List all clients
+export async function getClients() {
+  const { data, error } = await supabase.from('clients').select('*');
+  if (error) throw error;
+  return data || [];
+}
