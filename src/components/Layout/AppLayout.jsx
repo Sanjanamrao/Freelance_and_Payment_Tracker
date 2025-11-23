@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Toolbar } from '@mui/material';
 import Sidebar, { drawerWidth } from './Sidebar';
-import Topbar from './Topbar.jsx';
+import { Box, Toolbar } from '@mui/material';
 import Dashboard from '../../pages/Dashboard.jsx';
 import ProjectList from '../../pages/Projects/ProjectList.jsx';
 import ProjectForm from '../../pages/Projects/ProjectForm.jsx';
@@ -26,12 +25,11 @@ export default function AppLayout() {
         component="main"
         sx={{
           flexGrow: 1,
-          ml: `${drawerWidth}px`, // reserve space for the fixed drawer
+          ml: `${drawerWidth}px`, // reserve left space
           p: 3,
           minHeight: '100vh',
         }}
       >
-        <Topbar activeTab={activeTab} setActiveTab={setActiveTab} onAdd={() => setShowAddModal(true)} />
         <Toolbar />
         <Container maxWidth="xl" sx={{ py: 4 }}>
           {activeTab === 'dashboard' && <Dashboard />}

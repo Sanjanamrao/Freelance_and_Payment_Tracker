@@ -1,3 +1,4 @@
+// src/pages/Clients/ClientList.jsx
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Paper, Typography, Button, TextField } from '@mui/material';
 import { getClients } from '../../services/clients';
@@ -16,7 +17,7 @@ export default function ClientList() {
 
   async function fetchClients() {
     try {
-      const data = await getClients();
+      const data = await getClients(); // now pulls from client_summary_view
       setClients(data);
     } catch {
       notify('Failed to load clients', 'error');
@@ -33,12 +34,7 @@ export default function ClientList() {
       </Grid>
 
       <Paper sx={{ p: 2, mb: 2 }}>
-        <TextField
-          size="small"
-          placeholder="Search clients..."
-          value={q}
-          onChange={e => setQ(e.target.value)}
-        />
+        <TextField size="small" placeholder="Search clients..." value={q} onChange={e => setQ(e.target.value)} />
       </Paper>
 
       <Grid container spacing={3}>
@@ -65,7 +61,7 @@ export default function ClientList() {
                 </Box>
                 <Box>
                   <Typography variant="caption" color="text.secondary">Total Paid</Typography>
-                  <Typography variant="h6" color="success.main">₹ {Number(client.totalPaid || 0).toLocaleString()}</Typography>
+                  <Typography variant="h6" color="success.main">₹ {Number(client.total_paid || 0).toLocaleString()}</Typography>
                 </Box>
               </Box>
             </Paper>

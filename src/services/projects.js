@@ -1,54 +1,51 @@
-//services/projects.js
-
 import supabase from './supabase';
 
-// Get all projects
 export async function getProjects() {
-  const { data, error } = await supabase.from('projects').select('*');
+  const { data, error } = await supabase.from('projectstatusview').select('*');
   if (error) throw error;
   return data || [];
 }
 
-// Get a single project by ID
 export async function getProject(id) {
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('id', id) // use 'id' if your schema defines uuid PK
-    .single();
-
+  const { data, error } = await supabase.from('projectstatusview').select('*').eq('projectid', id).single();
   if (error) throw error;
   return data || null;
 }
 
-// Create a new project
 export async function createProject(payload) {
-  const { data, error } = await supabase
-    .from('projects')
-    .insert([payload])
-    .select()
-    .single();
+  const { data, error } = await supabase.rpc('add_project', {
+    _title: payload.title,
+    _description: payload.description,
+    _start: payload.startDate,
+    _end: payload.endDate,
+    _client: payload.clientId,
+    _budget: payload.budget,
+    _status: 'Pending'
+  });
 
   if (error) throw error;
-  return data || null;
+  return data;
 }
 
-// Update a project
+
+
 export async function updateProject(id, payload) {
-  const { data, error } = await supabase
-    .from('projects')
-    .update(payload)
-    .eq('id', id) // align with schema
-    .select()
-    .single();
-
+  const { error } = await supabase.rpc('update_project', {
+    _id: id,
+    _title: payload.Title,
+    _description: payload.Description,
+    _start: payload.StartDate,
+    _end: payload.EndDate,
+    _client: payload.ClientID,
+    _budget: payload.budget,
+    _status: payload.Status
+  });
   if (error) throw error;
-  return data || null;
+  return true;
 }
 
-// Delete a project
 export async function deleteProject(id) {
-  const { data, error } = await supabase.from('projects').delete().eq('id', id);
+  const { error } = await supabase.rpc('delete_project', { _id: id });
   if (error) throw error;
-  return data || [];
+  return true;
 }

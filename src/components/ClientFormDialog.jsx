@@ -10,9 +10,9 @@ export default function ClientFormDialog({ open, onClose, onSuccess }) {
 
   const handleSave = async () => {
     try {
-      await createClient(form);
-      onSuccess?.();   // refresh parent list
-      onClose();       // close modal
+      await createClient(form); // calls add_client stored procedure
+      onSuccess?.();            // refresh parent list
+      onClose();                // close modal
     } catch (err) {
       console.error('Error creating client:', err);
     }

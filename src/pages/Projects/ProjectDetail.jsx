@@ -13,7 +13,9 @@ export default function ProjectDetail({ id }) {
 
   useEffect(() => {
     if (!id) return;
-    getProject(id).then(res => setProject(res.data)).catch(() => notify('Failed to load project', 'error'));
+    getProject(id)
+  .then(res => setProject(res))
+  .catch(() => notify('Failed to load project', 'error'));
   }, [id, notify]);
 
   const handleChange = e => setProject(p => ({ ...p, [e.target.name]: e.target.value }));

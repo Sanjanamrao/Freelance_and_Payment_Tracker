@@ -1,49 +1,41 @@
 import supabase from './supabase';
 
-// Get all tasks
 export async function getTasks() {
   const { data, error } = await supabase.from('tasks').select('*');
   if (error) throw error;
   return data || [];
 }
 
-// Get a single task by ID
-export async function getTask(id) {
-  const { data, error } = await supabase
-    .from('tasks')
-    .select('*')
-    .eq('id', id)
-    .single();
-  if (error) throw error;
-  return data || null;
-}
-
-// Create a new task
-export async function createTask(payload) {
-  const { data, error } = await supabase
-    .from('tasks')
-    .insert([payload])
-    .select()
-    .single();
-  if (error) throw error;
-  return data || null;
-}
-
-// Update a task
-export async function updateTask(id, payload) {
-  const { data, error } = await supabase
-    .from('tasks')
-    .update(payload)
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) throw error;
-  return data || null;
-}
-
-// Delete a task
-export async function deleteTask(id) {
-  const { data, error } = await supabase.from('tasks').delete().eq('id', id);
+export async function getTasksByProject(projectId) {
+  const { data, error } = await supabase.from('tasks').select('*').eq('ProjectID', projectId);
   if (error) throw error;
   return data || [];
+}
+
+export async function createTask(payload) {
+  const { data, error } = await supabase.rpc('add_task', {
+    _project: payload.ProjectID,
+    _title: payload.Title,
+    _status: payload.Status || 'Pending',
+    _deadline: payload.Deadline
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function updateTask(id, payload) {
+  const { error } = await supabase.rpc('update_task', {
+    _id: id,
+    _title: payload.Title,
+    _status: payload.Status,
+    _deadline: payload.Deadline
+  });
+  if (error) throw error;
+  return true;
+}
+
+export async function deleteTask(id) {
+  const { error } = await supabase.rpc('delete_task', { _id: id });
+  if (error) throw error;
+  return true;
 }

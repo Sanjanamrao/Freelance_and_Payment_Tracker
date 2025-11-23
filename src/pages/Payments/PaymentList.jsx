@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Box, Paper, Typography, Button, Grid, TextField } from '@mui/material';
 import DataTable from '../../components/DataTable.jsx';
@@ -15,11 +14,20 @@ export default function PaymentList({ onShowAdd }) {
 
   const load = () => {
     setLoading(true);
-    getPayments().then(res => setRows(res.data)).catch(() => notify('Failed to load payments', 'error')).finally(() => setLoading(false));
+    getPayments()
+      .then(res => setRows(res?.data || []))     // ⭐ SAFE ASSIGNMENT
+      .catch(() => notify('Failed to load payments', 'error'))
+      .finally(() => setLoading(false));
   };
+
   useEffect(() => { load(); }, []);
 
-  const filtered = rows.filter(r => !q || (r.project || r.ProjectID || '').toString().toLowerCase().includes(q.toLowerCase()));
+  const filtered = (rows || []).filter(r =>     // ⭐ SAFE FILTER
+    !q || (r.ProjectID || r.project || '')
+      .toString()
+      .toLowerCase()
+      .includes(q.toLowerCase())
+  );
 
   const columns = [
     { field: 'PaymentID', headerName: 'ID' },
@@ -31,13 +39,25 @@ export default function PaymentList({ onShowAdd }) {
 
   return (
     <Box>
+
+      {/* FIXED MUI GRID */}
       <Grid container alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-        <Grid item><Typography variant="h6">Payments</Typography></Grid>
-        <Grid item><Button variant="contained" onClick={onShowAdd}>Record Payment</Button></Grid>
+        <Grid>
+          <Typography variant="h6">Payments</Typography>
+        </Grid>
+
+        <Grid>
+          <Button variant="contained" onClick={onShowAdd}>Record Payment</Button>
+        </Grid>
       </Grid>
 
       <Paper sx={{ p: 2, mb: 2 }}>
-        <TextField size="small" placeholder="Search payments..." value={q} onChange={e => setQ(e.target.value)} />
+        <TextField
+          size="small"
+          placeholder="Search payments..."
+          value={q}
+          onChange={e => setQ(e.target.value)}
+        />
       </Paper>
 
       <DataTable
@@ -57,7 +77,13 @@ export default function PaymentList({ onShowAdd }) {
         content="Are you sure you want to delete this payment?"
         onClose={() => setConfirm({ open: false, id: null })}
         onConfirm={() => {
-          deletePayment(confirm.id).then(() => { notify('Payment deleted', 'success'); load(); }).catch(() => notify('Delete failed', 'error')).finally(() => setConfirm({ open: false, id: null }));
+          deletePayment(confirm.id)
+            .then(() => {
+              notify('Payment deleted', 'success');
+              load();
+            })
+            .catch(() => notify('Delete failed', 'error'))
+            .finally(() => setConfirm({ open: false, id: null }));
         }}
       />
     </Box>

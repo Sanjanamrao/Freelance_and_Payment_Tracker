@@ -1,48 +1,44 @@
-// // src/pages/Tasks/TaskList.jsx
 import React, { useEffect, useState } from 'react';
-import { getTasks, deleteTask } from '../../services/tasks';
-import { Button, Grid, Paper, TextField, Typography } from '@mui/material';
-import DataTable from '../../components/DataTable.jsx';
-import ConfirmDialog from '../../components/ConfirmDialog.jsx';
-import { useToast } from '../../context/ToastContext.jsx';
+import { Box, Grid, Paper, Typography, Button } from '@mui/material';
+import { getTasksByProject } from '../../services/tasks';
+import TaskFormDialog from '../../components/TaskFormDialog';
 
-export default function TaskList({ onShowAdd }) {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [confirm, setConfirm] = useState({ open: false, id: null });
-  const { notify } = useToast();
-  const [q, setQ] = useState('');
+export default function TasksList({ projectId }) {
+  const [tasks, setTasks] = useState([]);
+  const [openAdd, setOpenAdd] = useState(false);
 
-  const load = () => {
-    setLoading(true);
-    getTasks().then(res => setRows(res.data)).catch(() => notify('Failed to load tasks', 'error')).finally(() => setLoading(false));
-  };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { fetchTasks(); }, [projectId]);
 
-  const filtered = rows.filter(r => !q || (r.Title || '').toLowerCase().includes(q.toLowerCase()));
-
-  const columns = [
-    { field: 'TaskID', headerName: 'ID' },
-    { field: 'ProjectID', headerName: 'Project' },
-    { field: 'Title', headerName: 'Title' },
-    { field: 'Status', headerName: 'Status', render: (val) => val },
-    { field: 'Deadline', headerName: 'Deadline' }
-  ];
+  async function fetchTasks() {
+    const data = await getTasksByProject(projectId);
+    setTasks(data);
+  }
 
   return (
-    <div>
-      <Grid container alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-        <Grid item><Typography variant="h6">Tasks</Typography></Grid>
-        <Grid item><Button variant="contained" onClick={onShowAdd}>New Task</Button></Grid>
+    <Box>
+      <Grid container justifyContent="space-between" sx={{ mb: 2 }}>
+        <Typography variant="h6">Tasks</Typography>
+        <Button variant="contained" onClick={() => setOpenAdd(true)}>Add Task</Button>
       </Grid>
 
-      <Paper sx={{ p: 2, mb: 2 }}><TextField size="small" placeholder="Search tasks..." value={q} onChange={e => setQ(e.target.value)} /></Paper>
+      <Grid container spacing={3}>
+        {tasks.map(t => (
+          <Grid item xs={12} md={4} key={t.TaskID}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="subtitle1">{t.Title}</Typography>
+              <Typography variant="caption">Status: {t.Status}</Typography>
+              <Typography variant="caption">Deadline: {t.Deadline}</Typography>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
 
-      <DataTable columns={columns} rows={filtered} loading={loading} page={0} rowsPerPage={10} onPageChange={() => {}} onRowsPerPageChange={() => {}} emptyLabel="No tasks" />
-
-      <ConfirmDialog open={confirm.open} title="Delete task" content="Are you sure?" onClose={() => setConfirm({ open: false, id: null })} onConfirm={() => {
-        deleteTask(confirm.id).then(() => { notify('Task deleted', 'success'); load(); }).catch(() => notify('Delete failed', 'error')).finally(() => setConfirm({ open: false, id: null }));
-      }} />
-    </div>
+      <TaskFormDialog
+        open={openAdd}
+        onClose={() => setOpenAdd(false)}
+        onSuccess={fetchTasks}
+        projectId={projectId}
+      />
+    </Box>
   );
 }
